@@ -1,5 +1,9 @@
 """
 Serial communication to write graphs
+Packet example: 'a007z'
+    where a is the servo id
+    007 is the servo position
+    z is the end of packet signal
 """
 
 import serial
@@ -14,8 +18,12 @@ while i < 5:
 
     # Convert the graph data to servo mapping here
 
-    # Write to the Arduino
-    ser.write('5') # Test
+    # Write a servo position packet to the Arduino
+    ser.write('a')
+    ser.write('1')
+    ser.write('2')
+    ser.write('7')
+    ser.write('z')
     time.sleep(3)
     i+=1
 
