@@ -10,6 +10,7 @@ import serial
 import time
 import csv
 from numpy import interp
+import pygame
 
 class GraphTranslator:
 
@@ -30,11 +31,11 @@ class GraphTranslator:
                     graph[2].append(int(row[2]))
         except IOError as e:
             print("Error reading file: " + str(e))
-    
+
         return graph
 
     def convertGraphToServoPositions(self, graph):
-        converted_graph = [[], [], []]
+        converted_graph = [graph[0], [], []]
         a_range = [min(graph[1]), max(graph[1])]
         b_range = [min(graph[2]), max(graph[2])]
 
@@ -45,11 +46,54 @@ class GraphTranslator:
 
         return converted_graph    
 
-    def writeGraphToArduino(self, converted_graph):
-        for x in range(0, len(graph[0])):
-            self.writePacketToArduino('a', converted_graph[1][x])
-            self.writePacketToArduino('b', converted_graph[2][x])
-            time.sleep(0.05)
+    def graphControl(self, converted_graph):
+        k = pygame.K_k
+        j = pygame.K_j
+        s = pygame.K_SPACE
+        forward = False
+        backward = False
+        space = False
+        # Start pygame input
+        pygame.init()
+        pygame_running = True
+        current_index = 0
+        while pygame_running == True:
+            # Check keydown/up
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == k:
+                        forward = True
+                    elif event.key == j:
+                        backward = True
+                    elif event.key == s:
+                        space = True
+                elif event.type == pygame.KEYUP:
+                    if event.key == k:
+                        forward = False
+                    elif event.key == j:
+                        backward = False
+                    elif event.key == s:
+                        space = False
+            # Do stuff based on keys
+            if forward:
+                # Go forward
+                if current_index < len(converted_graph[1]):
+                    current_index += 1
+                    self.writePacketToArduino('a', converted_graph[1][current_index])
+                    self.writePacketToArduino('b', converted_graph[2][current_index])
+                    time.sleep(0.05) 
+            if backward:
+                # Go backward
+                if current_index > 0:
+                    current_index-=1
+                    self.writePacketToArduino('a', converted_graph[1][current_index])
+                    self.writePacketToArduino('b', converted_graph[2][current_index])
+                    time.sleep(0.05)
+            if space:
+                # Report timestamp and quit
+                print('Stopped at timestamp ' + str(converted_graph[0][current_index]))
+                pygame_running = False
+                pygame.quit()
 
     def writePacketToArduino(self, motor, position):
         # Convert the position int
@@ -68,7 +112,7 @@ class GraphTranslator:
 
 if __name__ == '__main__':
     # arduino_port = '/dev/cu.usbmodem1421'
-    arduino_port = '/dev/ttyACM1'
+    arduino_port = '/dev/cu.usbmodem1421'
     a_servo_range = [5, 100]
     b_servo_range = [95, 0]
     terminate = False
@@ -82,4 +126,4 @@ if __name__ == '__main__':
         else:
             graph = gt.readGraphCSV('data/' + instruction)
             servo_mapped_graph = gt.convertGraphToServoPositions(graph)
-            gt.writeGraphToArduino(servo_mapped_graph)
+            gt.graphControl(servo_mapped_graph)
