@@ -52,7 +52,7 @@ class GraphTranslator:
         s = pygame.K_SPACE
         i = pygame.K_i
         m = pygame.K_m
-        pause = 0.05
+        pause = 0.1
         pause_step = 0.01
         forward = False
         backward = False
@@ -74,9 +74,11 @@ class GraphTranslator:
                     elif event.key == i:
                         if pause < 0.15:
                             pause += pause_step
+                        print(pause)
                     elif event.key == m:
                         if pause > 0.0:
                             pause -= pause_step
+                        print(pause)
                 elif event.type == pygame.KEYUP:
                     if event.key == k:
                         forward = False
@@ -87,18 +89,20 @@ class GraphTranslator:
             # Do stuff based on keys
             if forward:
                 # Go forward
-                if current_index < len(converted_graph[1]):
+                if current_index < len(converted_graph[1])-1:
                     current_index += 1
                     self.writePacketToArduino('a', converted_graph[1][current_index])
                     self.writePacketToArduino('b', converted_graph[2][current_index])
-                    time.sleep(pause_step) 
+                    time.sleep(pause) 
             if backward:
                 # Go backward
                 if current_index > 0:
                     current_index-=1
+                    if current_index < 0:
+                        current_index = 0
                     self.writePacketToArduino('a', converted_graph[1][current_index])
                     self.writePacketToArduino('b', converted_graph[2][current_index])
-                    time.sleep(pause_step)
+                    time.sleep(pause)
             if space:
                 # Report timestamp and quit
                 print('Stopped at timestamp ' + str(converted_graph[0][current_index]))
@@ -122,7 +126,7 @@ class GraphTranslator:
 
 if __name__ == '__main__':
     # arduino_port = '/dev/cu.usbmodem1421'
-    arduino_port = '/dev/ttyACM0'
+    arduino_port = '/dev/cu.usbmodem1421'
     a_servo_range = [15, 100]
     b_servo_range = [95, 10]
     terminate = False
