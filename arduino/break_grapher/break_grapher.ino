@@ -10,27 +10,38 @@
 
 #include <Servo.h>
 
+// Motors
 Servo aServo;
 Servo bServo;
+// Packets
 char newChar;
 bool readNum = false;
 int packetSlot = 100;
-boolean newData = false;
-char servo_id;
-int servo_position;
-int servo_add;
+char servoId;
+int servoPosition;
+int servoAdd;
+// Simultaneous motor control
+bool writeServos = false;
+int aPosition;
+int bPosition;
+int aPrevPosition = 0; // Also initial position
+int bPrevPosition = 0; // Also initial position
 
 void setup() {
   Serial.begin(9600);
   aServo.attach(9);
   bServo.attach(10);
+  aServo.write(aPrevPosition);
+  bServo.write(bPrevPosition);
 }
 
 void loop() {
-  recvInstruction();
-  if (newData == true) {
-    showNewData();
-    //writeServoPosition();
+  // If packet has been received for a and b, write
+  if (writeServos == true) {
+    showNewData(); // DEBUG
+    writeServoPosition();
+  } else {
+    recvInstruction();
   }
 }
 
@@ -41,43 +52,56 @@ void recvInstruction() {
     // Packet end: z
     if (newChar == 'z') {
       readNum = false;
-      newData = true;
       packetSlot = 100;
+      if (servoId == 'a') {
+        aPosition = servoPosition;
+      }
+      else if (servoId == 'b') {
+        bPosition == servoPosition;
+        writeServos = true;      
+      }
     }
     // Servo position
     else if (readNum == true) {
-      servo_add = packetSlot * int(newChar-'0');
-      servo_position += servo_add;
+      servoPosition += packetSlot * int(newChar-'0');
       packetSlot = packetSlot/10;
     }
     // Packet begin: servo id
     else if (newChar == 'a' || newChar == 'b') {
-      servo_id = newChar;
+      servoId = newChar;
       readNum = true;
-      servo_position = 0;
+      servoPosition = 0;
     }
   }
 }
 
 // Confirm we got things right
 void showNewData() {
-    Serial.println(servo_id);
-    Serial.println(servo_position);
-    //Serial.println(servo_id);
-    //Serial.println(servo_position);
-    newData = false;
+    Serial.println(aPrevPosition);
+    Serial.println(bPrevPosition);
+    Serial.println(aPosition);
+    Serial.println(bPosition);
 }
 
 // Write the servo position received
 void writeServoPosition() {
-  if (servo_id == "a") {
-    aServo.write(servo_position);
+  if (aPrevPosition < aPosition) {
+    aPrevPosition++;
+    aServo.write(aPrevPosition);
   }
-  else if (servo_id == "b") {
-    bServo.write(servo_position);
+  else if (aPrevPosition < aPosition) {
+    aPrevPosition--;
+    aServo.write(aPrevPosition);
   }
-  else {
-    Serial.println("ERROR: Invalid servo id");
+  if (bPrevPosition < bPosition) {
+    bPrevPosition++;
+    bServo.write(bPrevPosition);
   }
-  newData = false;
+  else if (bPrevPosition < bPosition) {
+    bPrevPosition--;
+    bServo.write(bPrevPosition);
+  }
+  if (aPrevPosition == aPosition && bPrevPosition == bPosition) {
+    writeServos = false;
+  }
 }
