@@ -50,6 +50,10 @@ class GraphTranslator:
         k = pygame.K_k
         j = pygame.K_j
         s = pygame.K_SPACE
+        i = pygame.K_i
+        m = pygame.K_m
+        pause = 0.05
+        pause_step = 0.01
         forward = False
         backward = False
         space = False
@@ -67,6 +71,12 @@ class GraphTranslator:
                         backward = True
                     elif event.key == s:
                         space = True
+                    elif event.key == i:
+                        if pause < 0.15:
+                            pause += pause_step
+                    elif event.key == m:
+                        if pause > 0.0:
+                            pause -= pause_step
                 elif event.type == pygame.KEYUP:
                     if event.key == k:
                         forward = False
@@ -81,14 +91,14 @@ class GraphTranslator:
                     current_index += 1
                     self.writePacketToArduino('a', converted_graph[1][current_index])
                     self.writePacketToArduino('b', converted_graph[2][current_index])
-                    time.sleep(0.05) 
+                    time.sleep(pause_step) 
             if backward:
                 # Go backward
                 if current_index > 0:
                     current_index-=1
                     self.writePacketToArduino('a', converted_graph[1][current_index])
                     self.writePacketToArduino('b', converted_graph[2][current_index])
-                    time.sleep(0.05)
+                    time.sleep(pause_step)
             if space:
                 # Report timestamp and quit
                 print('Stopped at timestamp ' + str(converted_graph[0][current_index]))
