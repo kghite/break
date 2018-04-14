@@ -31,24 +31,18 @@ class GraphTranslator:
         except IOError as e:
             print("Error reading file: " + str(e))
     
-        print('Loaded graph: ')
-        print(graph)
         return graph
 
     def convertGraphToServoPositions(self, graph):
         converted_graph = [[], [], []]
         a_range = [min(graph[1]), max(graph[1])]
-        print(a_range)
         b_range = [min(graph[2]), max(graph[2])]
-        print(b_range)        
 
         for value in graph[1]:
             converted_graph[1].append(int(interp(value, a_range, self.a_servo_range)))
         for value in graph[2]:
             converted_graph[2].append(int(interp(value, b_range, self.b_servo_range)))
-       
-        print('Converted graph: ')
-        print(converted_graph) 
+
         return converted_graph    
 
     def writeGraphToArduino(self, converted_graph):
@@ -58,8 +52,6 @@ class GraphTranslator:
             time.sleep(0.05)
 
     def writePacketToArduino(self, motor, position):
-        print ('Writing motor ' + motor + ' to ' + str(position))
-        
         # Convert the position int
         position = str(position)
         while len(position) < 3:
@@ -76,7 +68,7 @@ class GraphTranslator:
 
 if __name__ == '__main__':
     # arduino_port = '/dev/cu.usbmodem1421'
-    arduino_port = '/dev/ttyACM0'
+    arduino_port = '/dev/ttyACM1'
     a_servo_range = [5, 100]
     b_servo_range = [95, 0]
     terminate = False
@@ -88,6 +80,6 @@ if __name__ == '__main__':
             gt.shutDown()
             terminate = True
         else:
-            graph = gt.readGraphCSV(instruction)
+            graph = gt.readGraphCSV('data/' + instruction)
             servo_mapped_graph = gt.convertGraphToServoPositions(graph)
             gt.writeGraphToArduino(servo_mapped_graph)
