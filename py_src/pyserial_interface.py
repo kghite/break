@@ -52,7 +52,7 @@ class GraphTranslator:
         s = pygame.K_SPACE
         i = pygame.K_i
         m = pygame.K_m
-        pause = 0.1
+        pause = 0.06
         pause_step = 0.01
         forward = False
         backward = False
@@ -71,12 +71,14 @@ class GraphTranslator:
                         backward = True
                     elif event.key == s:
                         space = True
-                    elif event.key == i:
+                    elif event.key == m:
                         if pause < 0.15:
                             pause += pause_step
                         print(pause)
-                    elif event.key == m:
+                    elif event.key == i:
                         if pause > 0.0:
+                            if pause < 0:
+                                pause = 0
                             pause -= pause_step
                         print(pause)
                 elif event.type == pygame.KEYUP:
@@ -98,8 +100,6 @@ class GraphTranslator:
                 # Go backward
                 if current_index > 0:
                     current_index-=1
-                    if current_index < 0:
-                        current_index = 0
                     self.writePacketToArduino('a', converted_graph[1][current_index])
                     self.writePacketToArduino('b', converted_graph[2][current_index])
                     time.sleep(pause)
