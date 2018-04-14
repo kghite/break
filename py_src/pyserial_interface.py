@@ -68,9 +68,9 @@ class GraphTranslator:
 
 if __name__ == '__main__':
     # arduino_port = '/dev/cu.usbmodem1421'
-    arduino_port = '/dev/ttyACM1'
-    a_servo_range = [5, 100]
-    b_servo_range = [95, 0]
+    arduino_port = '/dev/ttyACM0'
+    a_servo_range = [15, 100]
+    b_servo_range = [95, 10]
     terminate = False
     gt = GraphTranslator(arduino_port, a_servo_range, b_servo_range)
 
