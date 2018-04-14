@@ -15,7 +15,7 @@ class GraphTranslator:
 
     def __init__(self, arduino_port, servo_range):
         self.s = serial.Serial(arduino_port, 9600)
-        self.servo_range
+        self.servo_range = servo_range
 
     def readGraphCSV(self, file_name):
         graph = [[], [], []]
