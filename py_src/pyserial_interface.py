@@ -22,7 +22,7 @@ class GraphTranslator:
         graph = [[], [], []]
         
         try:
-            with open(file_name, 'rb') as f:
+            with open(file_name, 'rt') as f:
                 reader = csv.reader(f)
                 for row in reader:
                     graph[0].append(int(row[0]))
@@ -55,7 +55,7 @@ class GraphTranslator:
         for x in range(0, len(graph[0])):
             self.writePacketToArduino('a', converted_graph[1][x])
             self.writePacketToArduino('b', converted_graph[2][x])
-            time.sleep(0.5)
+            time.sleep(0.05)
 
     def writePacketToArduino(self, motor, position):
         print ('Writing motor ' + motor + ' to ' + str(position))
@@ -65,24 +65,25 @@ class GraphTranslator:
         while len(position) < 3:
             position = '0' + position
     
-        self.s.write(motor)
-        self.s.write(position[0])
-        self.s.write(position[1])
-        self.s.write(position[2])
-        self.s.write('z')
+        self.s.write(motor.encode())
+        self.s.write(position[0].encode())
+        self.s.write(position[1].encode())
+        self.s.write(position[2].encode())
+        self.s.write('z'.encode())
     
     def shutDown(self):
         self.s.close()
 
 if __name__ == '__main__':
-    arduino_port = '/dev/cu.usbmodem1421'
+    # arduino_port = '/dev/cu.usbmodem1421'
+    arduino_port = '/dev/ttyACM0'
     a_servo_range = [5, 100]
     b_servo_range = [95, 0]
     terminate = False
     gt = GraphTranslator(arduino_port, a_servo_range, b_servo_range)
 
     while terminate == False:
-        instruction = raw_input('Enter csv file name or \'exit\':  ')
+        instruction = input('Enter csv file name or \'exit\':  ')
         if instruction == 'exit':
             gt.shutDown()
             terminate = True
