@@ -13,9 +13,10 @@ from numpy import interp
 
 class GraphTranslator:
 
-    def __init__(self, arduino_port, servo_range):
+    def __init__(self, arduino_port, a_servo_range, b_servo_range):
         self.s = serial.Serial(arduino_port, 9600)
-        self.servo_range = servo_range
+        self.a_servo_range = a_servo_range
+        self.b_servo_range = b_servo_range
 
     def readGraphCSV(self, file_name):
         graph = [[], [], []]
@@ -42,9 +43,9 @@ class GraphTranslator:
         print(b_range)        
 
         for value in graph[1]:
-            converted_graph[1].append(interp(value, a_range, self.servo_range))
+            converted_graph[1].append(int(interp(value, a_range, self.a_servo_range)))
         for value in graph[2]:
-            converted_graph[2].append(interp(value, b_range, self.servo_range))
+            converted_graph[2].append(int(interp(value, b_range, self.b_servo_range)))
        
         print('Converted graph: ')
         print(converted_graph) 
@@ -54,7 +55,7 @@ class GraphTranslator:
         for x in range(0, len(graph[0])):
             self.writePacketToArduino('a', converted_graph[1][x])
             self.writePacketToArduino('b', converted_graph[2][x])
-            time.sleep(5)
+            time.sleep(0.5)
 
     def writePacketToArduino(self, motor, position):
         print ('Writing motor ' + motor + ' to ' + str(position))
@@ -75,9 +76,10 @@ class GraphTranslator:
 
 if __name__ == '__main__':
     arduino_port = '/dev/cu.usbmodem1421'
-    servo_range = [0, 90]
+    a_servo_range = [5, 100]
+    b_servo_range = [95, 0]
     terminate = False
-    gt = GraphTranslator(arduino_port, servo_range)
+    gt = GraphTranslator(arduino_port, a_servo_range, b_servo_range)
 
     while terminate == False:
         instruction = raw_input('Enter csv file name or \'exit\':  ')

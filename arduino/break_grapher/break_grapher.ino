@@ -24,8 +24,8 @@ int servoAdd;
 bool writeServos = false;
 int aPosition;
 int bPosition;
-int aPrevPosition = 0; // Also initial position
-int bPrevPosition = 0; // Also initial position
+int aPrevPosition = 5; // Also initial position
+int bPrevPosition = 95; // Also initial position
 
 void setup() {
   Serial.begin(9600);
@@ -38,7 +38,6 @@ void setup() {
 void loop() {
   // If packet has been received for a and b, write
   if (writeServos == true) {
-    showNewData(); // DEBUG
     writeServoPosition();
   } else {
     recvInstruction();
@@ -56,31 +55,23 @@ void recvInstruction() {
       if (servoId == 'a') {
         aPosition = servoPosition;
       }
-      else if (servoId == 'b') {
-        bPosition == servoPosition;
+      if (servoId == 'b') {
+        bPosition = servoPosition;
         writeServos = true;      
       }
     }
     // Servo position
-    else if (readNum == true) {
+    if (readNum == true) {
       servoPosition += packetSlot * int(newChar-'0');
       packetSlot = packetSlot/10;
     }
     // Packet begin: servo id
-    else if (newChar == 'a' || newChar == 'b') {
+    if (newChar == 'a' || newChar == 'b') {
       servoId = newChar;
       readNum = true;
       servoPosition = 0;
     }
   }
-}
-
-// Confirm we got things right
-void showNewData() {
-    Serial.println(aPrevPosition);
-    Serial.println(bPrevPosition);
-    Serial.println(aPosition);
-    Serial.println(bPosition);
 }
 
 // Write the servo position received
@@ -89,7 +80,7 @@ void writeServoPosition() {
     aPrevPosition++;
     aServo.write(aPrevPosition);
   }
-  else if (aPrevPosition < aPosition) {
+  else if (aPrevPosition > aPosition) {
     aPrevPosition--;
     aServo.write(aPrevPosition);
   }
@@ -97,11 +88,13 @@ void writeServoPosition() {
     bPrevPosition++;
     bServo.write(bPrevPosition);
   }
-  else if (bPrevPosition < bPosition) {
+  else if (bPrevPosition > bPosition) {
     bPrevPosition--;
     bServo.write(bPrevPosition);
   }
   if (aPrevPosition == aPosition && bPrevPosition == bPosition) {
     writeServos = false;
+    Serial.println(aPosition);
+    Serial.println(bPosition);
   }
 }
