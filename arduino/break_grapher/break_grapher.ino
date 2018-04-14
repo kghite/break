@@ -38,7 +38,7 @@ void setup() {
 void loop() {
   // If packet has been received for a and b, write
   if (writeServos == true) {
-    //showNewData(); // DEBUG
+    showNewData(); // DEBUG
     writeServoPosition();
   } else {
     recvInstruction();
