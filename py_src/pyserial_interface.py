@@ -74,13 +74,11 @@ class GraphTranslator:
                     elif event.key == m:
                         if pause < 0.15:
                             pause += pause_step
-                        print(pause)
                     elif event.key == i:
                         if pause > 0.0:
                             if pause < 0:
                                 pause = 0
                             pause -= pause_step
-                        print(pause)
                 elif event.type == pygame.KEYUP:
                     if event.key == k:
                         forward = False
